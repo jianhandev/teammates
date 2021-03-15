@@ -5,6 +5,7 @@ on:
     branches:
       - master 
       - release
+      - search-api-migration
 jobs:
   LnP-testing:
     runs-on: ubuntu-latest
