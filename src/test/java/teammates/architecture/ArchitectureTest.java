@@ -448,13 +448,6 @@ public class ArchitectureTest {
     }
 
     @Test
-    public void testArchitecture_externalApi_searchApiCanOnlyBeAccessedBySomePackages() {
-        noClasses().that().resideOutsideOfPackage(includeSubpackages(STORAGE_SEARCH_PACKAGE))
-                .should().accessClassesThat().resideInAPackage("com.google.appengine.api.search..")
-                .check(ALL_CLASSES);
-    }
-
-    @Test
     public void testArchitecture_externalApi_cloudStorageApiCanOnlyBeAccessedByGcsService() {
         noClasses().that().doNotHaveSimpleName("GoogleCloudStorageService")
                 .and().resideOutsideOfPackage(includeSubpackages(CLIENT_SCRIPTS_PACKAGE))
