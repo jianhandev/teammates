@@ -7,7 +7,7 @@ on:
       - release
       - teammatesv8
       - search-api-migration
-      - 11020-test-setup-solr-ci
+      - jianhandev/11020-test-setup-solr-ci
   pull_request:
     branches:
       - master
