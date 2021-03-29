@@ -7,6 +7,7 @@ on:
       - release
       - teammatesv8
       - search-api-migration
+      - jianhandev/11020-test-setup-solr-ci
   pull_request:
     branches:
       - master
@@ -52,7 +53,7 @@ jobs:
       - name: Build Frontend Bundle
         run: npm run build -- --progress=false --serviceWorker=false
       - name: Run Solr
-        run: docker run --name tm_solr -d -p 8983:8983 solr:8.8.1
+        run: docker run --name=tm_solr -d -p 8983:8983 solr:8.8.1
       - name: Initialize Solr
         run: docker exec $(docker ps -qf "name=tm_solr") /bin/sh -c "$(cat ./solr.sh)"
       - name: Start App Engine
