@@ -3,13 +3,13 @@ name: E2E Tests
 on:
   push:
     branches:
-      - master 
+      - master
       - release
       - teammatesv8
       - search-api-migration
   pull_request:
     branches:
-      - master 
+      - master
       - release
       - teammatesv8
       - search-api-migration
@@ -37,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Update Property File 
+      - name: Update Property File
         run: mv $GITHUB_WORKSPACE/src/e2e/resources/test.ci-$E2E_BROWSER.properties src/e2e/resources/test.properties
         env:
           E2E_BROWSER: ${{ matrix.browser }}
@@ -46,12 +46,16 @@ jobs:
       - name: Set up local datastore emulator
         run: gcloud beta emulators datastore start --project=teammates-john --host-port=localhost:8484 --consistency=1.0 &
       - name: Create Config Files
-        run: ./gradlew createConfigs testClasses generateTypes 
+        run: ./gradlew createConfigs testClasses generateTypes
       - name: Install Frontend Dependencies
-        run: npm ci 
-      - name: Build Frontend Bundle 
-        run: npm run build -- --progress=false --serviceWorker=false 
-      - name: Start App Engine 
-        run: ./gradlew appengineStart 
-      - name: Start Tests 
-        run: xvfb-run --server-args="-screen 0 1024x768x24" ./gradlew e2eTests 
+        run: npm ci
+      - name: Build Frontend Bundle
+        run: npm run build -- --progress=false --serviceWorker=false
+      - name: Run Solr
+        run: docker run --name tm_solr -d -p 8983:8983 solr:8.8.1
+      - name: Initialize Solr
+        run: docker exec $(docker ps -qf "name=tm_solr") /bin/sh -c "$(cat ./solr.sh)"
+      - name: Start App Engine
+        run: ./gradlew appengineStart
+      - name: Start Tests
+        run: xvfb-run --server-args="-screen 0 1024x768x24" ./gradlew e2eTests

@@ -3,13 +3,14 @@ name: Component Tests
 on:
   push:
     branches:
-      - master 
+      - master
       - release
       - teammatesv8
       - search-api-migration
+      - 11020-test-setup-solr-ci
   pull_request:
     branches:
-      - master 
+      - master
       - release
       - teammatesv8
       - search-api-migration
@@ -20,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false #ensure both tests run even if one fails
       matrix:
-        os: [ubuntu-latest, windows-latest]   
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -37,17 +38,17 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Run Backend Linting 
-        run: ./gradlew lint --continue 
+      - name: Run Backend Linting
+        run: ./gradlew lint --continue
       - name: Install Frontend Dependencies
-        run: npm ci 
-      - name: Run Lint Checks 
-        run: npm run lint 
+        run: npm ci
+      - name: Run Lint Checks
+        run: npm run lint
   component-testing:
     strategy:
       fail-fast: false #ensure both tests run even if one fails
       matrix:
-        os: [ubuntu-latest, windows-latest]   
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -64,16 +65,20 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Run Backend Tests    
+      - name: Run Solr
+          run: docker run --name tm_solr -d -p 8983:8983 solr:8.8.1
+      - name: Initialize Solr
+          run: docker exec $(docker ps -qf "name=tm_solr") /bin/sh -c "$(cat ./solr.sh)"
+      - name: Run Backend Tests
         run: |
-          ./gradlew createConfigs componentTests 
+          ./gradlew createConfigs componentTests
           ./gradlew jacocoReport
-      - name: Generate Types 
+      - name: Generate Types
         run: ./gradlew generateTypes
-      - name: Install Frontend Dependencies 
-        run: npm ci 
-      - name: Run Frontend Tests 
-        run: npm run coverage 
-      - name: Upload to Codecov 
-        if: matrix.os == 'ubuntu-latest' #only upload to codecov on ubuntu VM 
+      - name: Install Frontend Dependencies
+        run: npm ci
+      - name: Run Frontend Tests
+        run: npm run coverage
+      - name: Upload to Codecov
+        if: matrix.os == 'ubuntu-latest' #only upload to codecov on ubuntu VM
         run: bash <(curl -s https://codecov.io/bash)
