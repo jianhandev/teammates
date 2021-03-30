@@ -52,10 +52,6 @@ jobs:
         run: npm ci
       - name: Build Frontend Bundle
         run: npm run build -- --progress=false --serviceWorker=false
-      - name: Run Solr
-        run: docker-compose run --name=tm_solr -d -p 8983:8983 solr:8.8.1
-      - name: Initialize Solr
-        run: docker-compose exec $(docker ps -qf "name=tm_solr") /bin/sh -c "$(cat ./solr.sh)"
       - name: Start App Engine
         run: ./gradlew appengineStart
       - name: Start Tests
